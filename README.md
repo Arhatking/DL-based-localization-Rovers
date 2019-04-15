@@ -1,2 +1,1 @@
-# DL-based-localization-Rovers
-Rover's deep learning-based localization for Mars exploration.
+# Rover's deep learning-based localization method for Mars exploration.
