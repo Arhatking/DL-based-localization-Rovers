@@ -1,7 +1,5 @@
 
 """
-Program to separate POL and VRT projections. 
-
 To download ALL the projections data: 
 	Spirit: wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" robots=off  https://pds-imaging.jpl.nasa.gov/data/mer/spirit/mer2om_0xxx/browse/navcam/
 	Opportunity: wget -r -nH --cut-dirs=2 --no-parent --reject="index.html*" robots=off  https://pds-imaging.jpl.nasa.gov/data/mer/opportunity/mer1om_0xxx/browse/navcam/
@@ -12,6 +10,7 @@ import os
 import subprocess 
 import matplotlib.pyplot as plt
 import cv2
+import gc
 
 def separateProjections(src, dst_pol, dst_vrt):
 	pol, vrt = 0, 0
@@ -73,10 +72,13 @@ def startCleaningData(file, columns=1, rows=1, fullsize=False):
 		sample = []
 		for img in imgs[i:i+nimgs]:
 			image = cv2.imread(img)
-			image = cv2.resize(image, (250, 250)) #To speed up
+			image = cv2.resize(image, (300, 300)) #To speed up
 			grid[img] = image
 			sample.append(img)
+			image=None
 		plotGrid(grid, columns, rows, fullsize)
+		del grid
+		del sample
 		answer = input("Next slot? [n/y]: ")
 		if answer == "n" or answer =="N":
 			print("No checkpoint saved.")
@@ -91,6 +93,7 @@ dst_pol = './../Desktop/Rover/ground-pol/'
 dst_vrt = './../Desktop/Rover/ground-vrt/'
 
 
+gc.collect()
 # Separate POL and VRT projections 
 #pol_o, vrt_o = separateProjections(directory1, dst_pol, dst_vrt)
 #pol_s, vrt_s = separateProjections(directory2, dst_pol, dst_vrt)
@@ -101,13 +104,15 @@ dst_vrt = './../Desktop/Rover/ground-vrt/'
 
 # Save its paths on a file, so in the cleaning step you don't start over from zero each time
 file = "unclean_data.txt"
-exportPaths(dst_vrt, file, False)
-#exportPaths(dst_pol, file)
+#exportPaths(dst_vrt, file, False)
+#exportPaths(dst_pol, file, False)
 
 
-# Remove all the bad images manually by displaying a grid of images and clicking on them to delete faster
+# Remove all the incomplete projections manually by displaying a grid of images and clicking on them to delete faster
 sample = []
-startCleaningData(file, 10, 10)
+#startCleaningData(file, 10, 10)
+print("Total: ", len(os.listdir(dst_pol)), " POL", len(os.listdir(dst_vrt)), " VRT") # 661, 676 ... total 1337
+
 
 
 
